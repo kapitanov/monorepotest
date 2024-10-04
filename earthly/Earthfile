@@ -1,0 +1,58 @@
+VERSION 0.8
+
+compile:
+    BUILD ./libs/contracts+compile
+    BUILD ./services/date+compile
+    BUILD ./services/time+compile
+
+test:
+    FROM alpine:latest
+    
+    BUILD ./libs/contracts+test
+    COPY (./libs/contracts+test/coverage.xml) coverage/libs-contracts.xml
+    COPY (./libs/contracts+test/tests.xml)    tests/libs-contracts.xml
+    SAVE ARTIFACT coverage/libs-contracts.xml AS LOCAL ./artifacts/coverage/libs-contracts.xml
+    SAVE ARTIFACT tests/libs-contracts.xml    AS LOCAL ./artifacts/tests/libs-contracts.xml
+
+    BUILD ./services/date+test
+    COPY (./services/date+test/coverage.xml) coverage/services-date.xml
+    COPY (./services/date+test/tests.xml)    tests/services-date.xml
+    SAVE ARTIFACT coverage/services-date.xml AS LOCAL ./artifacts/coverage/services-date.xml
+    SAVE ARTIFACT tests/services-date.xml    AS LOCAL ./artifacts/tests/services-date.xml
+
+    BUILD ./services/time+test
+    COPY (./services/time+test/coverage.xml) coverage/services-time.xml
+    COPY (./services/time+test/tests.xml)    tests/services-time.xml
+    SAVE ARTIFACT coverage/services-time.xml AS LOCAL ./artifacts/coverage/services-time.xml
+    SAVE ARTIFACT tests/services-time.xml    AS LOCAL ./artifacts/tests/services-time.xml
+
+lint:
+    FROM alpine:latest
+    
+    BUILD ./libs/contracts+lint
+    COPY (./libs/contracts+lint/lint.json) libs-contracts.json
+    SAVE ARTIFACT libs-contracts.json AS LOCAL ./artifacts/lint/libs-contracts.json
+
+    BUILD ./services/date+lint
+    COPY (./services/date+lint/lint.json)  services-date.json
+    SAVE ARTIFACT services-date.json AS LOCAL ./artifacts/lint/services-date.json
+
+    BUILD ./services/time+lint
+    COPY (./services/time+lint/lint.json)  services-time.json
+    SAVE ARTIFACT services-time.json AS LOCAL ./artifacts/lint/services-time.json
+
+docker:
+    BUILD ./services/date+docker
+    BUILD ./services/time+docker
+
+release:
+    BUILD ./services/date+release
+    BUILD ./services/time+release
+
+dev-up:
+    LOCALLY
+    RUN docker-compose up
+
+dev-down:
+    LOCALLY
+    RUN docker-compose down

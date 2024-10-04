@@ -1,0 +1,69 @@
+VERSION 0.8
+
+all:
+    FROM +test
+    FROM +release
+
+deps:
+    FROM golang:1.23-alpine
+    WORKDIR /src/services/date
+    COPY ../../libs/contracts+artifact/* /src/libs/contracts
+    COPY go.mod go.sum ./
+    RUN go mod download
+
+compile:
+    FROM +deps
+    COPY . .
+    RUN go build -o=date-service
+    SAVE ARTIFACT /src src
+    SAVE ARTIFACT date-service date-service
+
+test:
+    FROM +compile
+    ENV CGO_ENABLED=0
+    RUN go install gotest.tools/gotestsum@v1.12.0
+    RUN go install github.com/boumenot/gocover-cobertura@v1.2.0
+    RUN mkdir -p /out
+    RUN go list -test ./... | grep '\[' | cut -f1 -d' ' | sed "s|$(go list -m)|.|" > /out/test.list
+    RUN gotestsum --format-hide-empty-pkg  --junitfile /out/tests.xml -- -coverprofile=/out/coverage.out $(cat /out/test.list)
+    RUN go tool cover -func=/out/coverage.out -o /out/coverage.txt
+    RUN gocover-cobertura < /out/coverage.out > /out/coverage.xml
+    RUN cat /out/coverage.txt | grep 'total:' | awk '{printf "%s\n", $3}' > /out/coverage.percent
+    SAVE ARTIFACT /out/tests.xml tests.xml               AS LOCAL artifacts/tests.xml
+    SAVE ARTIFACT /out/coverage.txt coverage.txt         AS LOCAL artifacts/coverage.txt
+    SAVE ARTIFACT /out/coverage.xml coverage.xml         AS LOCAL artifacts/coverage.xml
+    SAVE ARTIFACT /out/coverage.percent coverage.percent AS LOCAL artifacts/coverage.percent
+
+golangci-yml-hack:
+    LOCALLY
+    SAVE ARTIFACT ../../.golangci.yml .golangci.yml
+
+lint:
+    FROM golangci/golangci-lint:v1.61.0-alpine
+    WORKDIR /src
+    COPY +golangci-yml-hack/.golangci.yml /src/.golangci.yml
+    COPY +compile/src .
+    RUN cd /src/services/date && \
+        mkdir -p /out && \
+        golangci-lint run -v -c /src/.golangci.yml --out-format code-climate --timeout 10m | tee /out/lint.json
+    SAVE ARTIFACT /out/lint.json lint.json AS LOCAL ./artifacts/lint.json
+
+docker:
+    FROM alpine:latest
+    WORKDIR /opt/services/date
+    COPY +compile/date-service .
+    ENTRYPOINT ["/opt/services/date/date-service"] 
+    SAVE IMAGE date-service:latest
+
+release-tag:
+    FROM golang:1.23-alpine
+    RUN go install github.com/maykonlf/semver-cli/cmd/semver@v1.0.2
+    COPY .semver.yaml .
+    RUN semver get release > version && cat version
+    SAVE ARTIFACT version
+
+release:
+    FROM +docker
+    COPY +release-tag/version .
+    ARG VERSION="$(cat version)"
+    SAVE IMAGE --push date-service:$VERSION
