@@ -1,0 +1,22 @@
+# https://moonrepo.dev/docs/config/project
+# yaml-language-server: $schema=https://moonrepo.dev/schemas/project.json
+$schema: "https://moonrepo.dev/schemas/project.json"
+
+type: configuration
+language: shell
+project:
+  name: go-tools
+  description: Golang build tools
+
+tasks:
+  install-go-tools:
+    script: |
+      $workspaceRoot/scripts/go-install.sh gotest.tools/gotestsum@v1.12.0
+      $workspaceRoot/scripts/go-install.sh github.com/boumenot/gocover-cobertura@v1.2.0
+      $workspaceRoot/scripts/go-install.sh github.com/golangci/golangci-lint/cmd/golangci-lint@v1.61.0
+      $workspaceRoot/scripts/go-install.sh github.com/maykonlf/semver-cli/cmd/semver@v1.0.2
+    inputs:
+      - "@group(scripts)"
+    platform: "system"
+    options:
+      mutex: go-tools

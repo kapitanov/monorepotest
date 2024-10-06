@@ -1,0 +1,49 @@
+# https://moonrepo.dev/docs/config/project
+# yaml-language-server: $schema=https://moonrepo.dev/schemas/project.json
+$schema: "https://moonrepo.dev/schemas/project.json"
+
+type: library
+language: go
+project:
+    name: contracts
+    description: A shared library with contracts
+
+dependsOn:
+    - go-tools
+
+tasks:
+    generate:
+        script: "go generate ./..."
+        platform: "system"
+        inputs:
+            - "@group(sources)"
+    compile:
+        deps:
+            - generate
+        script: $workspaceRoot/scripts/go-build.sh
+        platform: "system"
+        inputs:
+            - "@group(sources)"
+            - "@group(scripts)"
+    test:
+        deps:
+            - compile
+        script: $workspaceRoot/scripts/go-test.sh
+        platform: "system"
+        inputs:
+            - "@group(sources)"
+            - "@group(tests)"
+            - "@group(scripts)"
+    lint:
+        deps:
+            - test
+        script: $workspaceRoot/scripts/go-lint.sh
+        platform: "system"
+        inputs:
+            - "@group(sources)"
+            - "@group(scripts)"
+    all:
+        deps:
+            - compile
+            - test
+            - lint

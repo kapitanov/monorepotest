@@ -1,0 +1,9 @@
+# artifacts
+artifacts
+
+# temp files
+**/*.tmp
+
+# moon
+.moon/cache
+.moon/docker
