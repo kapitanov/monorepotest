@@ -1,0 +1,24 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_binary", "go_library", "go_test")
+
+go_library(
+    name = "time_lib",
+    srcs = ["main.go"],
+    importpath = "github.com/kapitanov/monorepotest/services/time",
+    visibility = ["//visibility:private"],
+    deps = [
+        "//libs/contracts",
+        "@com_github_labstack_echo_v4//:echo",
+    ],
+)
+
+go_binary(
+    name = "time",
+    embed = [":time_lib"],
+    visibility = ["//visibility:public"],
+)
+
+go_test(
+    name = "time_test",
+    srcs = ["main_test.go"],
+    embed = [":time_lib"],
+)

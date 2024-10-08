@@ -1,0 +1,19 @@
+load("@bazel_gazelle//:def.bzl", "gazelle", "gazelle_test")
+
+# gazelle:prefix github.com/kapitanov/monorepotest
+gazelle(name = "gazelle")
+
+gazelle(
+    name = "gazelle-update-repos",
+    args = [
+        "-from_file=go.work",
+        "-to_macro=go.work.bzl%go_dependencies",
+        "-prune",
+    ],
+    command = "update-repos",
+)
+
+gazelle_test(
+    name = "gazelle_test",
+    workspace = "//:BUILD.bazel",  # a file in the workspace root, where the gazelle will be run
+)

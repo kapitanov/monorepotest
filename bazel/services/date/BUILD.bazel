@@ -1,0 +1,24 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_binary", "go_library", "go_test")
+
+go_library(
+    name = "date_lib",
+    srcs = ["main.go"],
+    importpath = "github.com/kapitanov/monorepotest/services/date",
+    visibility = ["//visibility:private"],
+    deps = [
+        "//libs/contracts",
+        "@com_github_gin_gonic_gin//:gin",
+    ],
+)
+
+go_binary(
+    name = "date",
+    embed = [":date_lib"],
+    visibility = ["//visibility:public"],
+)
+
+go_test(
+    name = "date_test",
+    srcs = ["main_test.go"],
+    embed = [":date_lib"],
+)

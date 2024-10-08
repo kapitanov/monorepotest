@@ -1,0 +1,14 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
+
+go_library(
+    name = "contracts",
+    srcs = ["contracts.go"],
+    importpath = "github.com/kapitanov/monorepotest/libs/contracts",
+    visibility = ["//visibility:public"],
+)
+
+go_test(
+    name = "contracts_test",
+    srcs = ["contracts_test.go"],
+    embed = [":contracts"],
+)
