@@ -1,0 +1,12 @@
+{
+    "name": "go-tools",
+    "dependencies": [],
+    "glob": [
+        "tools/go-tools/*",
+        "scripts/*"
+    ],
+    "tasks": {
+        "install": "make install",
+        "all": "make"
+    }
+}

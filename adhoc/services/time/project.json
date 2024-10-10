@@ -1,0 +1,18 @@
+{
+    "name": "services-time",
+    "dependencies": [
+        "go-tools",
+        "libs-contracts"
+    ],
+    "glob": [
+        "services/time/*",
+        "scripts/*"
+    ],
+    "tasks": {
+        "compile": "make compile",
+        "test": "make test",
+        "lint": "make lint",
+        "docker": "make docker",
+        "all": "make"
+    }
+}

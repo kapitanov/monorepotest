@@ -1,0 +1,16 @@
+{
+    "name": "libs-contracts",
+    "dependencies": [
+        "go-tools"
+    ],
+    "glob": [
+        "libs/contracts/*",
+        "scripts/*"
+    ],
+    "tasks": {
+        "compile": "make compile",
+        "test": "make test",
+        "lint": "make lint",
+        "all": "make"
+    }
+}
